@@ -16,6 +16,11 @@ function apply(baseStr: string, ops: Operation[]): string {
             case 'insert':
                 baseStr = baseStr.substring(0, i) + (op.v as string) + baseStr.substring(i)
                 index += (op.v as string).length
+                break;
+            case 'delete':
+                baseStr = baseStr.substring(0, index) + baseStr.substring(index + (op.v as number))
+                break;
         }
     }
+    return baseStr
 }
