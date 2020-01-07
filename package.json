@@ -1,0 +1,10 @@
+{
+    "name": "operational-transformation",
+    "devDependencies": {
+        "typescript":"3.7.4",
+        "jasmine": "3.5.0"
+    },
+    "scripts": {
+        "compile": "tsc"
+    }
+}
