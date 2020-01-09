@@ -5,7 +5,7 @@ export type Operation = {
     v: number | string
 }
 
-function apply(baseStr: string, ops: Operation[]): string {
+export function apply(baseStr: string, ops: Operation[]): string {
     var index = 0;
     for (var i = 0; i < ops.length; i++) {
         var op = ops[i]
@@ -44,7 +44,7 @@ export function transform(ops1: Operation[], ops2: Operation[]): Operation[][] {
     var op1Index = 0
     var op2Index = 0
     var op1: Operation | undefined, op2: Operation | undefined;
-    while (op1Index < ops1.length || op2Index < ops2.length) {
+    while (op1Index < ops1.length || op2Index < ops2.length || op1 || op2) {
         if (op1Index === ops1.length && op1 === undefined) {
             //append all the rest op2 to the newOps2
             append(newOps2, op2)
@@ -70,16 +70,40 @@ export function transform(ops1: Operation[], ops2: Operation[]): Operation[][] {
 }
 
 /**
- * Compose two single operations op1 and op2 into one operation.
- * returns [restOp, restOp2, composedOp]
+ * Compose two single operations op1 and op2 into an operation list.
+ * returns [restOps1, restOps2, composedOps]
  */
-export type SingleOperationCompose = (op1: Operation, op2: Operation) => (Operation | undefined)[]
+export type SingleOperationCompose = (op1: Operation, op2: Operation) => Operation[][]
 
 /**
  * Compose operation ops1 and ops2 return composedOps. So that apply(apply(str, ops1), ops2) == apply(str, composedOps)
  */
 export function compose(ops1: Operation[], ops2: Operation[]): Operation[] {
+    var result: Operation[] = []
+    var op1Index = 0;
+    var op2Index = 0;
+    var op1: Operation | undefined, op2: Operation | undefined
+    while (op1Index < ops1.length || op2Index < ops2.length || op1 || op2) {
+        if (op1Index === ops1.length && op1 === undefined) {
+            append(result, op2)
+            appendList(result, ops2.slice(op2Index))
+            break;
+        }
+        if (op2Index === ops2.length && op2 === undefined) {
+            append(result, op1)
+            appendList(result, ops1.slice(op1Index))
+            break;
+        }
 
+        op1 = op1 || ops1[op1Index++]
+        op2 = op2 || ops2[op2Index++]
+        var composeFn = composeMap[op1.t][op2.t]
+        var [restOp1, restOp2, composedOps] = composeFn(op1, op2)
+        op1 = restOp1[0]
+        op2 = restOp2[0]
+        appendList(result, composedOps)
+    }
+    return result
 }
 
 /**
@@ -205,34 +229,53 @@ const transformMap = {
     }
 }
 
-const InsertInsertCompose: SingleOperationCompose = (op1, op2) => [undefined, undefined, { t: "insert", v: (op2.v as string) + (op1.v as string) }]
-const InsertRetainCompose: SingleOperationCompose = (op1, op2) => [undefined, op2, op1]
+const InsertInsertCompose: SingleOperationCompose = (op1, op2) => [[], [], [{ t: "insert", v: (op2.v as string) + (op1.v as string) }]]
+const InsertRetainCompose: SingleOperationCompose = (op1, op2) => [[], [op2], [op1]]
 const InsertDeleteCompose: SingleOperationCompose = (op1, op2) => {
     var diff = (op1.v as string).length - (op2.v as number)
     return [
-        diff > 0 ? { t: "insert", v: (op1.v as string).slice(op2.v as number) } : undefined,
-        diff < 0 ? { t: "delete", v: -diff } : undefined,
-        undefined
+        diff > 0 ? [{ t: "insert", v: (op1.v as string).slice(op2.v as number) }] : [],
+        diff < 0 ? [{ t: "delete", v: -diff }] : [],
+        []
     ]
 }
 
-const RetainInsertCompose: SingleOperationCompose = (op1, op2) => [op1, undefined, op2]
+const RetainInsertCompose: SingleOperationCompose = (op1, op2) => [[op1], [], [op2]]
 const RetainRetainCompose: SingleOperationCompose = (op1, op2) => {
     var diff = (op1.v as number) - (op2.v as number)
     return [
-        diff > 0 ? { t: "retain", v: diff } : undefined,
-        diff < 0 ? { t: "retain", v: -diff } : undefined,
-        { t: "retain", v: Math.min(op1.v as number, op2.v as number) }
+        diff > 0 ? [{ t: "retain", v: diff }] : [],
+        diff < 0 ? [{ t: "retain", v: -diff }] : [],
+        [{ t: "retain", v: Math.min(op1.v as number, op2.v as number) }]
     ]
 }
 const RetainDeleteCompose: SingleOperationCompose = (op1, op2) => {
     var diff = (op1.v as number) - (op2.v as number)
     return [
-        diff > 0 ? { t: "retain", v: diff } : undefined,
-        diff < 0 ? { t: "delete", v: -diff } : undefined,
-        { t: "delete", v: Math.min(op1.v as number, op2.v as number) }
+        diff > 0 ? [{ t: "retain", v: diff }] : [],
+        diff < 0 ? [{ t: "delete", v: -diff }] : [],
+        [{ t: "delete", v: Math.min(op1.v as number, op2.v as number) }]
     ]
 }
 
+const DeleteInsertCompose: SingleOperationCompose = (op1, op2) => [[], [], [op1, op2]]
+const DeleteRetainCompose: SingleOperationCompose = (op1, op2) => [[], [op2], [op1]]
+const DeleteDeleteCompose: SingleOperationCompose = (op1, op2) => [[], [], [{ t: "delete", v: (op1.v as number) + (op2.v as number) }]]
+
 const composeMap = {
+    "insert": {
+        "insert": InsertInsertCompose,
+        "retain": InsertRetainCompose,
+        "delete": InsertDeleteCompose
+    },
+    "retain": {
+        "insert": RetainInsertCompose,
+        "retain": RetainRetainCompose,
+        "delete": RetainDeleteCompose
+    },
+    "delete": {
+        "insert": DeleteInsertCompose,
+        "retain": DeleteRetainCompose,
+        "delete": DeleteDeleteCompose
+    }
 }
