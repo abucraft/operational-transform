@@ -2,6 +2,8 @@
 
 Operational Transform是一种解决实现多人协同实时在线编辑的数据同步问题的方法。  
 
+操作步骤可视化 https://abucraft.github.io/operational-transform/ 
+
 ## 协同实时编辑  
 
 在多人同时在线编辑一个文档时，一旦摸一个参与者编辑了文档，这个修改会立即同步到其他参与者的计算机上。  
