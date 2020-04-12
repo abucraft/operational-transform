@@ -1,0 +1,349 @@
+input[type=checkbox] {
+    vertical-align: top;
+}
+
+.well {
+    margin-bottom: 0px;
+}
+
+#server {
+    position: relative;
+    z-index: 1;
+}
+
+#server h2 {
+    color: #1e488d;
+}
+
+#server h2,
+.client h2 {
+    margin-top: 0px;
+}
+
+#server .history-area {
+    display: flex;
+}
+
+#server .history-area .message {
+    margin-right: 4px;
+}
+
+.text {
+    padding: 5px;
+}
+
+.clients {
+    display: flex;
+    width: 100%;
+}
+
+.clients>.client {
+    margin-right: 32px;
+}
+
+.clients>.client:last-child {
+    margin-right: 0px;
+}
+
+.client-block {
+    position: relative;
+}
+
+.table.table-noheader>tbody>tr>td {
+    border-top: none;
+}
+
+.clients-container {
+    display: flex;
+}
+
+.client-container {
+    flex: 1;
+    margin-right: 32px;
+    display: flex;
+    flex-direction: column;
+}
+
+.client-container:last-child {
+    margin-right: 0px;
+}
+
+.chanels-container {
+    display: flex;
+    justify-content: center;
+}
+
+.chanels {
+    display: flex;
+    flex-grow: 1;
+    max-width: 320px;
+    justify-content: space-between;
+}
+
+.chanels>div {
+    position: relative;
+    width: 64px;
+}
+
+.chanels>div>a {
+    position: absolute;
+    left: 3px;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.chanels>div>a:hover {
+    color: #0eb4c7;
+}
+
+.chanels .connection {
+    position: absolute;
+    height: 100%;
+    border-left: 4px dashed #daedef;
+    left: 31px;
+}
+
+.chanels>div.up>a {
+    top: 12px;
+}
+
+.chanels>div.down>a {
+    bottom: 12px;
+}
+
+.chanels>div>a.disabled {
+    color: rgb(209, 209, 209);
+    cursor: default;
+}
+
+.message {
+    background-color: rgb(231, 80, 105);
+    height: 18px;
+    width: 18px;
+    border-radius: 18px;
+}
+
+.message:hover {
+    box-shadow: 0px 0px 5px 2px rgba(173, 173, 173, 1);
+    ;
+}
+
+.chanels .message {
+    transition: top 0.5s, box-shadow 0.5s;
+}
+
+.connection .message {
+    position: absolute;
+    left: -2px;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+.state-area {
+    display: flex;
+}
+
+.state-area .message {
+    margin-right: 4px;
+}
+
+.state-area *+.message {
+    margin-left: 4px;
+}
+
+span.op-text {
+    white-space: nowrap;
+    border-radius: 4px;
+    margin-right: 2px;
+    display: inline-block;
+    margin-bottom: 4px;
+    padding: 0px 4px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+span.op-text.retain {
+    background-color: rgb(202, 202, 202);
+}
+
+span.op-text.insert {
+    color: white;
+    background-color: rgb(57, 160, 57);
+}
+
+span.op-text.delete {
+    color: white;
+    background-color: rgb(216, 82, 70);
+}
+
+
+.transform-area .title,
+.transform-area .operations-area,
+.transform-area .pipe-area,
+.transform-area .waiting,
+.transform-area .description {
+    display: flex;
+    justify-content: space-around;
+}
+
+.transform-area .description {
+    text-align: center;
+}
+
+.transform-area .pipe-area>div {
+    background-image: url('./pipe-background.png');
+    background-repeat: repeat-y;
+    background-position-x: center;
+    position: relative;
+}
+
+.transform-area .title h5 {
+    width: 50%;
+    text-align: center;
+}
+
+.transform-area .operations-area>div,
+.transform-area .pipe-area>div,
+.transform-area .waiting>div {
+    width: 350px;
+}
+
+.transform-area .waiting>div {
+    position: relative;
+    overflow: hidden;
+}
+
+.transform-area .waiting .ops-block {
+    position: relative;
+    transition: left 0.4s;
+}
+
+.transform-area .operations-area>div {
+    display: flex;
+    flex-direction: column;
+}
+
+.transform-area .operations-area>div>div {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.transform-area.before .operations-area>div>div {
+    justify-content: flex-end;
+}
+
+.transform-area .operations-area>div>div * {
+    flex-shrink: 0;
+}
+
+.transform-area.after .processing {
+    position: relative;
+    padding-top: 100px;
+}
+
+.transform-area.after .processing .pipe-area {
+    position: absolute;
+    top: -30px;
+    height: 160px;
+    width: 100%;
+}
+
+.transform-area.before {
+    position: relative;
+    z-index: 1;
+}
+
+.transform-area.after .processing .operations-area {
+    min-height: 30px;
+    position: relative;
+}
+
+.transform-area .ops-block {
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+    border: 2px dashed rgb(160, 160, 160);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transform-area .op-block {
+    height: 30px;
+    border-radius: 4px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 4px;
+    position: relative;
+}
+
+.transform-area .operations-area .op-block {
+    transition: top 0.2s, bottom 0.2s, left 0.4s, height 0.2s;
+}
+
+.transform-area .pipe-area .op-block {
+    position: absolute;
+    transition: top 0.6s cubic-bezier(.29, .46, .77, .62);
+    width: calc(100% - 38px);
+    left: 19px;
+}
+
+.transform-area .op-block.collapse {
+    background-color: white;
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    display: block;
+    text-align: center;
+    font-weight: bold;
+}
+
+.transform-area.before .op-block.collapse {
+    top: 0px;
+}
+
+.transform-area.after .op-block.collapse {
+    bottom: 0px;
+}
+
+.transform-area .op-block::before {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-right: 8px;
+}
+
+.transform-area .op-block.insert {
+    color: white;
+    background-color: rgb(57, 160, 57);
+}
+
+.transform-area .op-block.insert::before {
+    content: "INSERT";
+    background-color: white;
+    color: rgb(57, 160, 57);
+}
+
+.transform-area .op-block.retain {
+    background-color: rgb(202, 202, 202);
+}
+
+.transform-area .op-block.retain::before {
+    content: "RETAIN";
+    background-color: white;
+    color: rgb(202, 202, 202);
+}
+
+.transform-area .op-block.delete {
+    background-color: rgb(216, 82, 70);
+}
+
+.transform-area .op-block.delete::before {
+    content: "DELETE";
+    background-color: white;
+    color: rgb(216, 82, 70);
+}

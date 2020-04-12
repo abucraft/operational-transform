@@ -14,7 +14,7 @@ export function apply(baseStr: string, ops: Operation[]): string {
                 index += op.v as number
                 break;
             case 'insert':
-                baseStr = baseStr.substring(0, i) + (op.v as string) + baseStr.substring(i)
+                baseStr = baseStr.substring(0, index) + (op.v as string) + baseStr.substring(index)
                 index += (op.v as string).length
                 break;
             case 'delete':
@@ -69,6 +69,24 @@ export function transform(ops1: Operation[], ops2: Operation[]): Operation[][] {
     return [newOps2, newOps1]
 }
 
+export function transformOnce(ops1: Operation[], ops2: Operation[]): Operation[][] {
+    if (ops1.length === 0 && ops2.length !== 0) {
+        var result = ops2.shift() as Operation
+        return [[result], []]
+    } else if (ops2.length === 0 && ops1.length !== 0) {
+        var result = ops1.shift() as Operation
+        return [[], [result]]
+    } else {
+        var op1 = ops1.shift() as Operation
+        var op2 = ops2.shift() as Operation
+        var transformFn = transformMap[op1.t][op2.t]
+        var [restOp1, restOp2, transOp2, transOp1] = transformFn(op1, op2)
+        restOp1.forEach(op => ops1.unshift(op))
+        restOp2.forEach(op => ops2.unshift(op))
+        return [transOp2, transOp1]
+    }
+}
+
 /**
  * Compose two single operations op1 and op2 into an operation list.
  * returns [restOps1, restOps2, composedOps]
@@ -109,7 +127,7 @@ export function compose(ops1: Operation[], ops2: Operation[]): Operation[] {
 /**
  * append operation to an existing operation list
  */
-function append(ops: Operation[], op: Operation | undefined): void {
+export function append(ops: Operation[], op: Operation | undefined): Operation | undefined {
     if (op) {
         if (ops.length > 0 && ops[ops.length - 1].t === op.t) {
             // if op.t is retain or delete, the new value is the sum number
@@ -118,6 +136,7 @@ function append(ops: Operation[], op: Operation | undefined): void {
             ops[ops.length - 1].v += op.v as any
         } else ops.push(op)
     }
+    return op
 }
 
 /**
@@ -133,8 +152,8 @@ function appendList(ops: Operation[], newOps: Operation[]): void {
 
 const InsertInsertTransform: SingleOperationTransform = (op1, op2) => {
     return [
-        [], [],
-        [{ t: "retain", v: (op1.v as string).length }, op2],
+        [], [op2],
+        [{ t: "retain", v: (op1.v as string).length }],
         [op1]
     ]
 }
@@ -176,6 +195,7 @@ const DeleteRetainTransform: SingleOperationTransform = (op1, op2) => {
 
 const DeleteDeleteTransform: SingleOperationTransform = (op1, op2) => {
     var diff = op1.v as number - (op2.v as number)
+    var min = Math.min(op1.v as number, op2.v as number)
     return [
         diff > 0 ? [{ t: "delete", v: diff }] : [],
         diff < 0 ? [{ t: "delete", v: -diff }] : [],
@@ -188,16 +208,17 @@ const RetainInsertTransform: SingleOperationTransform = (op1, op2) => {
         [op1],
         [],
         [op2],
-        [{ t: "retain", v: op2.v }]
+        [{ t: "retain", v: (op2.v as string).length }]
     ]
 }
 
 const RetainRetainTransform: SingleOperationTransform = (op1, op2) => {
     var diff = op1.v as number - (op2.v as number)
+    var min = Math.min(op1.v as number, op2.v as number)
     return [
         diff > 0 ? [{ t: "retain", v: diff }] : [],
         diff < 0 ? [{ t: "retain", v: -diff }] : [],
-        [], []
+        [{ t: 'retain', v: min }], [{ t: 'retain', v: min }]
     ]
 }
 
@@ -230,7 +251,13 @@ const transformMap = {
 }
 
 const InsertInsertCompose: SingleOperationCompose = (op1, op2) => [[], [], [{ t: "insert", v: (op2.v as string) + (op1.v as string) }]]
-const InsertRetainCompose: SingleOperationCompose = (op1, op2) => [[], [op2], [op1]]
+const InsertRetainCompose: SingleOperationCompose = (op1, op2) => {
+    var diff = (op1.v as string).length - (op2.v as number)
+    return [
+        diff > 0 ? [{ t: "insert", v: (op1.v as string).slice(op2.v as number) }] : [],
+        diff < 0 ? [{ t: "retain", v: -diff }] : [],
+        [{ t: "insert", v: diff > 0 ? (op1.v as string).slice(0, op2.v as number) : op1.v }]]
+}
 const InsertDeleteCompose: SingleOperationCompose = (op1, op2) => {
     var diff = (op1.v as string).length - (op2.v as number)
     return [

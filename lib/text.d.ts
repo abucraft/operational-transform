@@ -17,6 +17,7 @@ export declare type SingleOperationTransform = (op1: Operation, op2: Operation) 
  * This function assume ops1 happens before ops2
  */
 export declare function transform(ops1: Operation[], ops2: Operation[]): Operation[][];
+export declare function transformOnce(ops1: Operation[], ops2: Operation[]): Operation[][];
 /**
  * Compose two single operations op1 and op2 into an operation list.
  * returns [restOps1, restOps2, composedOps]
@@ -26,3 +27,7 @@ export declare type SingleOperationCompose = (op1: Operation, op2: Operation) =>
  * Compose operation ops1 and ops2 return composedOps. So that apply(apply(str, ops1), ops2) == apply(str, composedOps)
  */
 export declare function compose(ops1: Operation[], ops2: Operation[]): Operation[];
+/**
+ * append operation to an existing operation list
+ */
+export declare function append(ops: Operation[], op: Operation | undefined): Operation | undefined;

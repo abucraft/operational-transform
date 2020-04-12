@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: './src/visualization.ts',
+    devtool: "sourcemap",
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'main.js'
@@ -15,4 +16,12 @@ module.exports = {
             { test: /\.ts$/, use: 'ts-loader' }
         ]
     },
+
+    devServer: {
+        contentBase: __dirname,
+        compress: true,
+        watchContentBase: true,
+        publicPath: "/dist/",
+        port: 9000
+    }
 };
